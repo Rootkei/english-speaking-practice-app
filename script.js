@@ -5,6 +5,11 @@ const CONFIG = {
     model: 'llama-3.3-70b-versatile',
     storageKey: 'groq_api_key',
     themeStorageKey: 'theme_preference',
+    historyStorageKey: 'vocabulary_history',
+    bookmarksStorageKey: 'bookmarked_sentences',
+    sentenceCountKey: 'sentence_count_preference',
+    speechRateKey: 'speech_rate_preference',
+    voicePreferenceKey: 'voice_preference',
     randomWords: [
         'adventure', 'beautiful', 'challenge', 'discover', 'elegant',
         'freedom', 'grateful', 'harmony', 'inspire', 'journey',
@@ -21,10 +26,33 @@ const elements = {
     // Theme
     themeToggle: document.getElementById('themeToggle'),
 
+    // History & Bookmarks
+    historyBtn: document.getElementById('historyBtn'),
+    bookmarksBtn: document.getElementById('bookmarksBtn'),
+    bookmarkCount: document.getElementById('bookmarkCount'),
+    historyModal: document.getElementById('historyModal'),
+    bookmarksModal: document.getElementById('bookmarksModal'),
+    closeHistory: document.getElementById('closeHistory'),
+    closeBookmarks: document.getElementById('closeBookmarks'),
+    historyList: document.getElementById('historyList'),
+    bookmarksList: document.getElementById('bookmarksList'),
+    clearHistory: document.getElementById('clearHistory'),
+
+    // Sentence Count
+    sentenceCount: document.getElementById('sentenceCount'),
+
+    // Pronunciation
+    speechRate: document.getElementById('speechRate'),
+    voiceSelect: document.getElementById('voiceSelect'),
+
+    // Toast
+    toast: document.getElementById('toast'),
+
     // Settings
     toggleSettings: document.getElementById('toggleSettings'),
     settingsContent: document.getElementById('settingsContent'),
-    toggleArrow: document.querySelector('.toggle-arrow'),
+    toggleUserSettings: document.getElementById('toggleUserSettings'),
+    userSettingsContent: document.getElementById('userSettingsContent'),
     apiKeyInput: document.getElementById('apiKeyInput'),
     toggleApiKey: document.getElementById('toggleApiKey'),
     saveApiKey: document.getElementById('saveApiKey'),
@@ -68,9 +96,15 @@ function init() {
         }
     }
 
+    // Initialize features
+    initSentenceCount();
+    updateBookmarkCount();
+    initVoiceSettings();
+
     // Add event listeners
     elements.themeToggle.addEventListener('click', toggleTheme);
     elements.toggleSettings.addEventListener('click', toggleSettings);
+    elements.toggleUserSettings.addEventListener('click', toggleUserSettings);
     elements.toggleApiKey.addEventListener('click', toggleApiKeyVisibility);
     elements.saveApiKey.addEventListener('click', saveApiKey);
     elements.generateBtn.addEventListener('click', handleGenerate);
@@ -79,6 +113,34 @@ function init() {
         if (e.key === 'Enter') {
             handleGenerate();
         }
+    });
+
+    // History & Bookmarks
+    elements.historyBtn.addEventListener('click', () => {
+        displayHistory();
+        openModal(elements.historyModal);
+    });
+    elements.bookmarksBtn.addEventListener('click', () => {
+        displayBookmarks();
+        openModal(elements.bookmarksModal);
+    });
+    elements.closeHistory.addEventListener('click', () => closeModal(elements.historyModal));
+    elements.closeBookmarks.addEventListener('click', () => closeModal(elements.bookmarksModal));
+    elements.clearHistory.addEventListener('click', clearAllHistory);
+
+    // Sentence Count
+    elements.sentenceCount.addEventListener('change', updateSentenceCount);
+
+    // Pronunciation
+    elements.speechRate.addEventListener('change', updateSpeechRate);
+    elements.voiceSelect.addEventListener('change', updateVoicePreference);
+
+    // Close modals on background click
+    elements.historyModal.addEventListener('click', (e) => {
+        if (e.target === elements.historyModal) closeModal(elements.historyModal);
+    });
+    elements.bookmarksModal.addEventListener('click', (e) => {
+        if (e.target === elements.bookmarksModal) closeModal(elements.bookmarksModal);
     });
 }
 
@@ -113,7 +175,14 @@ function toggleTheme() {
 function toggleSettings() {
     const isExpanded = elements.settingsContent.classList.toggle('expanded');
     elements.settingsContent.classList.toggle('hidden', !isExpanded);
-    elements.toggleArrow.classList.toggle('rotated', isExpanded);
+    elements.toggleSettings.querySelector('.toggle-arrow').style.transform =
+        isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function toggleUserSettings() {
+    const isExpanded = elements.userSettingsContent.classList.toggle('expanded');
+    elements.toggleUserSettings.querySelector('.toggle-arrow').style.transform =
+        isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
 function toggleApiKeyVisibility() {
@@ -285,6 +354,12 @@ function displaySentences(word, sentences) {
         const card = createSentenceCard(sentence, index + 1, word);
         elements.sentencesContainer.appendChild(card);
     });
+
+    // Make highlighted words clickable for pronunciation
+    makeWordsClickable();
+
+    // Save to history
+    saveToHistory(word, sentences);
 }
 
 function createSentenceCard(sentence, number, word) {
@@ -293,6 +368,9 @@ function createSentenceCard(sentence, number, word) {
 
     // Highlight the word in the sentence
     const highlightedText = highlightWord(sentence.text, word);
+
+    // Check if bookmarked
+    const bookmarked = isBookmarked(word, sentence.text);
 
     card.innerHTML = `
         <div class="sentence-header">
@@ -307,11 +385,44 @@ function createSentenceCard(sentence, number, word) {
             <span class="context-label">Context: ${sentence.context}</span>
             ${sentence.contextVietnamese ? `<span class="context-vietnamese"> (${sentence.contextVietnamese})</span>` : ''}
         </p>
+        <div class="sentence-actions">
+            <button class="action-btn bookmark-btn ${bookmarked ? 'bookmarked' : ''}" data-word="${word}" aria-label="Bookmark">
+                ${bookmarked ? '⭐ Bookmarked' : '☆ Bookmark'}
+            </button>
+            <button class="action-btn copy-btn" aria-label="Copy">
+                📋 Copy
+            </button>
+        </div>
     `;
 
     // Add click event to play button
     const playBtn = card.querySelector('.play-btn');
     playBtn.addEventListener('click', () => speakSentence(sentence.text, playBtn));
+
+    // Add bookmark button event
+    const bookmarkBtn = card.querySelector('.bookmark-btn');
+    bookmarkBtn.addEventListener('click', () => {
+        if (bookmarkBtn.classList.contains('bookmarked')) {
+            // Find and remove bookmark
+            const bookmarks = loadBookmarks();
+            const bookmark = bookmarks.find(b => b.word === word && b.sentence.text === sentence.text);
+            if (bookmark) {
+                removeBookmark(bookmark.id);
+                bookmarkBtn.classList.remove('bookmarked');
+                bookmarkBtn.innerHTML = '☆ Bookmark';
+            }
+        } else {
+            addBookmark(word, sentence);
+            bookmarkBtn.classList.add('bookmarked');
+            bookmarkBtn.innerHTML = '⭐ Bookmarked';
+        }
+    });
+
+    // Add copy button event
+    const copyBtn = card.querySelector('.copy-btn');
+    copyBtn.addEventListener('click', () => {
+        copyToClipboard(sentence.text);
+    });
 
     return card;
 }
@@ -340,20 +451,16 @@ function speakSentence(text, button) {
     // Create new speech synthesis
     const utterance = new SpeechSynthesisUtterance(text);
 
-    // Configure speech settings
-    utterance.rate = 0.9; // Slightly slower for learning
+    // Use user's pronunciation settings
+    const voice = getPreferredVoice();
+    const rate = parseFloat(elements.speechRate.value);
+
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.rate = rate;
     utterance.pitch = 1;
     utterance.volume = 1;
-
-    // Try to use an English voice
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoice = voices.find(voice =>
-        voice.lang.startsWith('en-') && voice.name.includes('Google')
-    ) || voices.find(voice => voice.lang.startsWith('en-'));
-
-    if (englishVoice) {
-        utterance.voice = englishVoice;
-    }
 
     // Add playing state
     button.classList.add('playing');
@@ -373,6 +480,8 @@ function speakSentence(text, button) {
     // Speak
     currentSpeech = utterance;
     window.speechSynthesis.speak(utterance);
+
+    console.log(`🔊 Speaking sentence (${voice?.name || 'default'}, ${rate}x)`);
 }
 
 function showLoading() {
@@ -383,6 +492,328 @@ function showLoading() {
 
 function hideLoading() {
     elements.loadingIndicator.classList.add('hidden');
+}
+
+// ===== History Functions =====
+function saveToHistory(word, sentences) {
+    const history = loadHistory();
+    const historyItem = {
+        id: Date.now(),
+        word: word,
+        sentences: sentences,
+        createdAt: new Date().toISOString()
+    };
+
+    history.unshift(historyItem); // Add to beginning
+
+    // Keep only last 50 items
+    if (history.length > 50) {
+        history.splice(50);
+    }
+
+    localStorage.setItem(CONFIG.historyStorageKey, JSON.stringify(history));
+    console.log(`✓ Saved "${word}" to history`);
+}
+
+function loadHistory() {
+    const data = localStorage.getItem(CONFIG.historyStorageKey);
+    return data ? JSON.parse(data) : [];
+}
+
+function deleteHistoryItem(id) {
+    let history = loadHistory();
+    history = history.filter(item => item.id !== id);
+    localStorage.setItem(CONFIG.historyStorageKey, JSON.stringify(history));
+    displayHistory();
+    showToast('History item deleted', 'success');
+}
+
+function clearAllHistory() {
+    if (confirm('Are you sure you want to clear all history?')) {
+        localStorage.removeItem(CONFIG.historyStorageKey);
+        displayHistory();
+        showToast('All history cleared', 'success');
+    }
+}
+
+function displayHistory() {
+    const history = loadHistory();
+    const container = elements.historyList;
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>📭 No history yet</p>
+                <p class="empty-hint">Start generating sentences to build your learning history!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = history.map(item => `
+        <div class="history-item">
+            <div class="item-header">
+                <span class="item-word">${item.word}</span>
+                <span class="item-date">${formatDate(item.createdAt)}</span>
+            </div>
+            <div class="item-actions">
+                <button class="item-btn" onclick="loadHistoryItem(${item.id})">📖 View</button>
+                <button class="item-btn delete" onclick="deleteHistoryItem(${item.id})">🗑️ Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function loadHistoryItem(id) {
+    const history = loadHistory();
+    const item = history.find(h => h.id === id);
+    if (item) {
+        elements.wordInput.value = item.word;
+        displaySentences(item.word, item.sentences);
+        closeModal(elements.historyModal);
+        showToast(`Loaded "${item.word}"`, 'success');
+    }
+}
+
+// ===== Bookmarks Functions =====
+function addBookmark(word, sentence) {
+    const bookmarks = loadBookmarks();
+    const bookmarkId = `${word}_${Date.now()}`;
+
+    const bookmark = {
+        id: bookmarkId,
+        word: word,
+        sentence: sentence,
+        createdAt: new Date().toISOString()
+    };
+
+    bookmarks.unshift(bookmark);
+    localStorage.setItem(CONFIG.bookmarksStorageKey, JSON.stringify(bookmarks));
+    updateBookmarkCount();
+    showToast('Sentence bookmarked!', 'success');
+    console.log(`✓ Bookmarked sentence from "${word}"`);
+}
+
+function removeBookmark(id) {
+    let bookmarks = loadBookmarks();
+    bookmarks = bookmarks.filter(b => b.id !== id);
+    localStorage.setItem(CONFIG.bookmarksStorageKey, JSON.stringify(bookmarks));
+    displayBookmarks();
+    updateBookmarkCount();
+    showToast('Bookmark removed', 'success');
+}
+
+function loadBookmarks() {
+    const data = localStorage.getItem(CONFIG.bookmarksStorageKey);
+    return data ? JSON.parse(data) : [];
+}
+
+function isBookmarked(word, sentenceText) {
+    const bookmarks = loadBookmarks();
+    return bookmarks.some(b => b.word === word && b.sentence.text === sentenceText);
+}
+
+function displayBookmarks() {
+    const bookmarks = loadBookmarks();
+    const container = elements.bookmarksList;
+
+    if (bookmarks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>📭 No bookmarks yet</p>
+                <p class="empty-hint">Click the star icon on sentences to bookmark them!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = bookmarks.map(bookmark => `
+        <div class="bookmark-item">
+            <div class="item-header">
+                <span class="item-word">${bookmark.word}</span>
+                <span class="item-date">${formatDate(bookmark.createdAt)}</span>
+            </div>
+            <p class="sentence-text">${highlightWord(bookmark.sentence.text, bookmark.word)}</p>
+            <p class="sentence-vietnamese">${bookmark.sentence.vietnamese || ''}</p>
+            <div class="item-actions">
+                <button class="item-btn" onclick="copyToClipboard(\`${escapeQuotes(bookmark.sentence.text)}\`)">📋 Copy</button>
+                <button class="item-btn delete" onclick="removeBookmark('${bookmark.id}')">🗑️ Remove</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateBookmarkCount() {
+    const count = loadBookmarks().length;
+    if (count > 0) {
+        elements.bookmarkCount.textContent = count;
+        elements.bookmarkCount.classList.remove('hidden');
+    } else {
+        elements.bookmarkCount.classList.add('hidden');
+    }
+}
+
+// ===== Sentence Count Functions =====
+function initSentenceCount() {
+    const savedCount = localStorage.getItem(CONFIG.sentenceCountKey) || '10';
+    elements.sentenceCount.value = savedCount;
+    CONFIG.maxSentences = parseInt(savedCount);
+}
+
+function updateSentenceCount() {
+    const count = elements.sentenceCount.value;
+    CONFIG.maxSentences = parseInt(count);
+    localStorage.setItem(CONFIG.sentenceCountKey, count);
+    console.log(`✓ Sentence count updated to ${count}`);
+}
+
+// ===== Copy to Clipboard =====
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('✓ Copied to clipboard!', 'success');
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        showToast('❌ Failed to copy', 'error');
+    });
+}
+
+// ===== Toast Notification =====
+function showToast(message, type = 'success') {
+    elements.toast.textContent = message;
+    elements.toast.className = `toast ${type}`;
+    elements.toast.classList.remove('hidden');
+
+    setTimeout(() => {
+        elements.toast.classList.add('hidden');
+    }, 3000);
+}
+
+// ===== Modal Functions =====
+function openModal(modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// ===== Utility Functions =====
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+
+    return date.toLocaleDateString();
+}
+
+function escapeQuotes(str) {
+    return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+// ===== Word Pronunciation Functions =====
+let availableVoices = [];
+
+function initVoiceSettings() {
+    // Load saved preferences
+    const savedRate = localStorage.getItem(CONFIG.speechRateKey) || '1.0';
+    const savedVoice = localStorage.getItem(CONFIG.voicePreferenceKey) || 'en-US';
+
+    elements.speechRate.value = savedRate;
+    elements.voiceSelect.value = savedVoice;
+
+    // Load available voices
+    loadVoices();
+
+    console.log(`✓ Voice settings initialized: ${savedVoice} at ${savedRate}x speed`);
+}
+
+function loadVoices() {
+    availableVoices = speechSynthesis.getVoices();
+    if (availableVoices.length === 0) {
+        // Voices not loaded yet, wait for event
+        speechSynthesis.onvoiceschanged = () => {
+            availableVoices = speechSynthesis.getVoices();
+        };
+    }
+}
+
+function getPreferredVoice() {
+    const preference = elements.voiceSelect.value;
+
+    // Try to find exact match
+    let voice = availableVoices.find(v => v.lang === preference);
+
+    // Fallback to any English voice
+    if (!voice) {
+        voice = availableVoices.find(v => v.lang.startsWith('en'));
+    }
+
+    // Ultimate fallback to first available voice
+    if (!voice && availableVoices.length > 0) {
+        voice = availableVoices[0];
+    }
+
+    return voice;
+}
+
+function speakWord(word, element) {
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(word);
+    const voice = getPreferredVoice();
+    const rate = parseFloat(elements.speechRate.value);
+
+    if (voice) {
+        utterance.voice = voice;
+    }
+    utterance.rate = rate;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    // Add visual feedback
+    if (element) {
+        element.classList.add('speaking');
+        utterance.onend = () => {
+            element.classList.remove('speaking');
+        };
+    }
+
+    speechSynthesis.speak(utterance);
+    console.log(`🔊 Speaking: "${word}" (${voice?.name || 'default'}, ${rate}x)`);
+}
+
+function updateSpeechRate() {
+    const rate = elements.speechRate.value;
+    localStorage.setItem(CONFIG.speechRateKey, rate);
+    console.log(`✓ Speech rate updated to ${rate}x`);
+}
+
+function updateVoicePreference() {
+    const voice = elements.voiceSelect.value;
+    localStorage.setItem(CONFIG.voicePreferenceKey, voice);
+    console.log(`✓ Voice preference updated to ${voice}`);
+}
+
+function makeWordsClickable() {
+    // Add click event to all highlighted words
+    document.querySelectorAll('.highlight').forEach(wordElement => {
+        wordElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const word = wordElement.textContent.trim();
+            speakWord(word, wordElement);
+        });
+    });
 }
 
 // ===== Initialize Speech Synthesis =====

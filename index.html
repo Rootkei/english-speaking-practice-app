@@ -24,10 +24,19 @@
                         <span class="title-icon">🎯</span>
                         English Speaking Practice
                     </h1>
-                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-                        <span class="theme-icon theme-icon-dark">🌙</span>
-                        <span class="theme-icon theme-icon-light">☀️</span>
-                    </button>
+                    <div class="header-actions">
+                        <button id="historyBtn" class="icon-btn" aria-label="View history" title="History">
+                            <span>📚</span>
+                        </button>
+                        <button id="bookmarksBtn" class="icon-btn" aria-label="View bookmarks" title="Bookmarks">
+                            <span>⭐</span>
+                            <span id="bookmarkCount" class="badge hidden">0</span>
+                        </button>
+                        <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                            <span class="theme-icon theme-icon-dark">🌙</span>
+                            <span class="theme-icon theme-icon-light">☀️</span>
+                        </button>
+                    </div>
                 </div>
                 <p class="subtitle">Master vocabulary through contextual sentences</p>
             </div>
@@ -58,6 +67,7 @@
                             <span class="btn-icon">💾</span>
                             Save API Key
                         </button>
+
                         <div class="api-info">
                             <p class="info-title">📌 How to get your API key:</p>
                             <ol class="info-list">
@@ -91,6 +101,61 @@
                 <p class="hint-text">Leave empty and click "Random Word" for a surprise!</p>
             </div>
 
+            <!-- User Settings Panel -->
+            <div class="user-settings-panel">
+                <button id="toggleUserSettings" class="settings-toggle">
+                    <span class="settings-icon">⚙️</span>
+                    <span>Settings</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+
+                <div id="userSettingsContent" class="user-settings-content">
+                    <!-- Sentence Count Selector -->
+                    <div class="setting-group">
+                        <label for="sentenceCount" class="setting-label">
+                            <span class="label-icon">📝</span>
+                            <span class="label-text">Number of Sentences</span>
+                        </label>
+                        <select id="sentenceCount" class="sentence-count-select">
+                            <option value="5">5 sentences</option>
+                            <option value="10" selected>10 sentences</option>
+                            <option value="15">15 sentences</option>
+                            <option value="20">20 sentences</option>
+                        </select>
+                    </div>
+
+                    <!-- Pronunciation Controls -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <span class="label-icon">🔊</span>
+                            <span class="label-text">Pronunciation</span>
+                        </label>
+
+                        <div class="pronunciation-controls">
+                            <div class="control-group">
+                                <label for="speechRate" class="control-label">Speed:</label>
+                                <select id="speechRate" class="control-select">
+                                    <option value="1.0" selected>Normal</option>
+                                    <option value="0.75">Slow</option>
+                                    <option value="0.5">Very Slow</option>
+                                </select>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="voiceSelect" class="control-label">Voice:</label>
+                                <select id="voiceSelect" class="control-select">
+                                    <option value="en-US">🇺🇸 US English</option>
+                                    <option value="en-GB">🇬🇧 UK English</option>
+                                    <option value="en-AU">🇦🇺 Australian</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <p class="pronunciation-hint">💡 Click on highlighted words to hear pronunciation</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="loadingIndicator" class="loading-indicator hidden">
                 <div class="spinner"></div>
                 <p>Generating sentences...</p>
@@ -110,6 +175,50 @@
             <p>💡 Tip: Click the speaker icon to hear each sentence pronounced</p>
         </footer>
     </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📚 Learning History</h2>
+                <button class="modal-close" id="closeHistory" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-actions">
+                    <button id="clearHistory" class="btn btn-secondary btn-sm">
+                        <span>🗑️</span> Clear All
+                    </button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-state">
+                        <p>📭 No history yet</p>
+                        <p class="empty-hint">Start generating sentences to build your learning history!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookmarks Modal -->
+    <div id="bookmarksModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⭐ Bookmarked Sentences</h2>
+                <button class="modal-close" id="closeBookmarks" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bookmarksList" class="bookmarks-list">
+                    <div class="empty-state">
+                        <p>📭 No bookmarks yet</p>
+                        <p class="empty-hint">Click the star icon on sentences to bookmark them!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
 
     <script src="config.js"></script>
     <script src="script.js"></script>
