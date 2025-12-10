@@ -10,6 +10,7 @@ const CONFIG = {
     sentenceCountKey: 'sentence_count_preference',
     speechRateKey: 'speech_rate_preference',
     voicePreferenceKey: 'voice_preference',
+    genderPreferenceKey: 'gender_preference',
     randomWords: [
         'adventure', 'beautiful', 'challenge', 'discover', 'elegant',
         'freedom', 'grateful', 'harmony', 'inspire', 'journey',
@@ -44,6 +45,7 @@ const elements = {
     // Pronunciation
     speechRate: document.getElementById('speechRate'),
     voiceSelect: document.getElementById('voiceSelect'),
+    genderSelect: document.getElementById('genderSelect'),
 
     // Toast
     toast: document.getElementById('toast'),
@@ -134,6 +136,7 @@ function init() {
     // Pronunciation
     elements.speechRate.addEventListener('change', updateSpeechRate);
     elements.voiceSelect.addEventListener('change', updateVoicePreference);
+    elements.genderSelect.addEventListener('change', updateGenderPreference);
 
     // Close modals on background click
     elements.historyModal.addEventListener('click', (e) => {
@@ -727,14 +730,16 @@ function initVoiceSettings() {
     // Load saved preferences
     const savedRate = localStorage.getItem(CONFIG.speechRateKey) || '1.0';
     const savedVoice = localStorage.getItem(CONFIG.voicePreferenceKey) || 'en-US';
+    const savedGender = localStorage.getItem(CONFIG.genderPreferenceKey) || 'female';
 
     elements.speechRate.value = savedRate;
     elements.voiceSelect.value = savedVoice;
+    elements.genderSelect.value = savedGender;
 
     // Load available voices
     loadVoices();
 
-    console.log(`✓ Voice settings initialized: ${savedVoice} at ${savedRate}x speed`);
+    console.log(`✓ Voice settings initialized: ${savedVoice} (${savedGender}) at ${savedRate}x speed`);
 }
 
 function loadVoices() {
@@ -748,22 +753,61 @@ function loadVoices() {
 }
 
 function getPreferredVoice() {
-    const preference = elements.voiceSelect.value;
+    const localePreference = elements.voiceSelect.value;
+    const genderPreference = elements.genderSelect.value;
 
-    // Try to find exact match
-    let voice = availableVoices.find(v => v.lang === preference);
+    // Filter by locale first
+    let localeVoices = availableVoices.filter(v => v.lang === localePreference || v.lang.replace('_', '-').startsWith(localePreference));
 
-    // Fallback to any English voice
-    if (!voice) {
-        voice = availableVoices.find(v => v.lang.startsWith('en'));
+    // If no exact locale match, try loose match
+    if (localeVoices.length === 0) {
+        localeVoices = availableVoices.filter(v => v.lang.startsWith('en'));
     }
 
-    // Ultimate fallback to first available voice
-    if (!voice && availableVoices.length > 0) {
-        voice = availableVoices[0];
+    // Heuristic mapping for gender based on voice names
+    // This isn't perfect as Speech API doesn't standardly expose gender, but works for many common voices (Google, Microsoft)
+    let genderVoice = localeVoices.find(v => {
+        const name = v.name.toLowerCase();
+        if (genderPreference === 'female') {
+            return name.includes('super') || name.includes('female') || name.includes('woman') || name.includes('girl') || name.includes('samantha') || name.includes('zira') || name.includes('google us english') || name.includes('google uk english female');
+        } else {
+            return name.includes('male') && !name.includes('female') || name.includes('man') || name.includes('boy') || name.includes('david') || name.includes('daniel') || name.includes('google uk english male');
+        }
+    });
+
+    // Fallback logic
+    if (!genderVoice) {
+        // For Google voices specifically, usually:
+        // US English -> Female
+        // UK English Female / Male are explicit
+
+        // If we want female and couldn't find explicit female, pick the first one (often female default)
+        // If we want male, try to avoid known female names
+        if (genderPreference === 'male') {
+            genderVoice = localeVoices.find(v => {
+                const name = v.name.toLowerCase();
+                return !name.includes('female') && !name.includes('woman') && !name.includes('girl') && !name.includes('samantha') && !name.includes('zira');
+            });
+        }
+
+        // If still nothing, just take the first available for that locale
+        if (!genderVoice && localeVoices.length > 0) {
+            genderVoice = localeVoices[0];
+        }
     }
 
-    return voice;
+    // Ultimate fallback if nothing matches locale
+    if (!genderVoice && availableVoices.length > 0) {
+        genderVoice = availableVoices[0];
+    }
+
+    return genderVoice;
+}
+
+function updateGenderPreference() {
+    const gender = elements.genderSelect.value;
+    localStorage.setItem(CONFIG.genderPreferenceKey, gender);
+    console.log(`✓ Gender preference updated to ${gender}`);
 }
 
 function speakWord(word, element) {
