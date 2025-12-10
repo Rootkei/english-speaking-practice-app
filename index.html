@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Practice English speaking with AI-generated sentences and text-to-speech functionality">
+    <title>English Speaking Practice - Learn with Context</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <span class="title-icon">🎯</span>
+                    English Speaking Practice
+                </h1>
+                <p class="subtitle">Master vocabulary through contextual sentences</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- API Key Configuration -->
+            <div class="settings-section">
+                <button id="toggleSettings" class="settings-toggle">
+                    <span class="settings-icon">⚙️</span>
+                    <span>API Settings</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+                <div id="settingsContent" class="settings-content hidden">
+                    <div class="api-key-section">
+                        <label for="apiKeyInput" class="api-label">
+                            <span class="label-text">Groq API Key</span>
+                            <span class="label-badge">Required</span>
+                        </label>
+                        <div class="api-input-wrapper">
+                            <input type="password" id="apiKeyInput" class="api-key-input"
+                                placeholder="Enter your Groq API key..." autocomplete="off">
+                            <button id="toggleApiKey" class="toggle-visibility-btn" title="Show/Hide API Key">
+                                👁️
+                            </button>
+                        </div>
+                        <button id="saveApiKey" class="btn btn-save">
+                            <span class="btn-icon">💾</span>
+                            Save API Key
+                        </button>
+                        <div class="api-info">
+                            <p class="info-title">📌 How to get your API key:</p>
+                            <ol class="info-list">
+                                <li>Visit <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq
+                                        Console</a></li>
+                                <li>Sign in with your Google or GitHub account</li>
+                                <li>Click "Create API Key" and give it a name</li>
+                                <li>Copy the key and paste it above</li>
+                            </ol>
+                            <p class="info-note">⚠️ Your API key is stored locally in your browser and never sent to any
+                                third party.</p>
+                        </div>
+                        <div id="apiStatus" class="api-status hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <input type="text" id="wordInput" class="word-input" placeholder="Enter a word to practice..."
+                        autocomplete="off">
+                    <button id="generateBtn" class="btn btn-primary">
+                        <span class="btn-icon">✨</span>
+                        Generate Sentences
+                    </button>
+                    <button id="randomBtn" class="btn btn-secondary">
+                        <span class="btn-icon">🎲</span>
+                        Random Word
+                    </button>
+                </div>
+                <p class="hint-text">Leave empty and click "Random Word" for a surprise!</p>
+            </div>
+
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p>Generating sentences...</p>
+            </div>
+
+            <div id="currentWord" class="current-word hidden">
+                <span class="word-label">Current Word:</span>
+                <span id="wordDisplay" class="word-display"></span>
+            </div>
+
+            <div id="sentencesContainer" class="sentences-container">
+                <!-- Sentences will be dynamically inserted here -->
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>💡 Tip: Click the speaker icon to hear each sentence pronounced</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
