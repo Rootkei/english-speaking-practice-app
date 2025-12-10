@@ -4,6 +4,7 @@ const CONFIG = {
     apiEndpoint: 'https://api.groq.com/openai/v1/chat/completions',
     model: 'llama-3.3-70b-versatile',
     storageKey: 'groq_api_key',
+    themeStorageKey: 'theme_preference',
     randomWords: [
         'adventure', 'beautiful', 'challenge', 'discover', 'elegant',
         'freedom', 'grateful', 'harmony', 'inspire', 'journey',
@@ -17,6 +18,9 @@ const CONFIG = {
 
 // ===== DOM Elements =====
 const elements = {
+    // Theme
+    themeToggle: document.getElementById('themeToggle'),
+
     // Settings
     toggleSettings: document.getElementById('toggleSettings'),
     settingsContent: document.getElementById('settingsContent'),
@@ -38,17 +42,34 @@ const elements = {
 
 // ===== State Management =====
 let currentSpeech = null;
-let apiKey = localStorage.getItem(CONFIG.storageKey) || '';
+// Check for API key from config file first, then localStorage
+let apiKey = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GROQ_API_KEY)
+    ? APP_CONFIG.GROQ_API_KEY
+    : (localStorage.getItem(CONFIG.storageKey) || '');
+let isApiKeyFromConfig = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GROQ_API_KEY;
 
 // ===== Initialize =====
 function init() {
-    // Load saved API key
-    if (apiKey) {
-        elements.apiKeyInput.value = apiKey;
-        showApiStatus('API key loaded from storage', 'success');
+    // Initialize theme
+    initTheme();
+
+    // If API key is from config file, hide the settings section
+    if (isApiKeyFromConfig) {
+        const settingsSection = document.querySelector('.settings-section');
+        if (settingsSection) {
+            settingsSection.style.display = 'none';
+        }
+        console.log('✓ API key loaded from config.js');
+    } else {
+        // Load saved API key from localStorage
+        if (apiKey) {
+            elements.apiKeyInput.value = apiKey;
+            showApiStatus('API key loaded from storage', 'success');
+        }
     }
 
     // Add event listeners
+    elements.themeToggle.addEventListener('click', toggleTheme);
     elements.toggleSettings.addEventListener('click', toggleSettings);
     elements.toggleApiKey.addEventListener('click', toggleApiKeyVisibility);
     elements.saveApiKey.addEventListener('click', saveApiKey);
@@ -59,6 +80,33 @@ function init() {
             handleGenerate();
         }
     });
+}
+
+// ===== Theme Functions =====
+function initTheme() {
+    // Get saved theme from localStorage or default to 'dark'
+    const savedTheme = localStorage.getItem(CONFIG.themeStorageKey) || 'dark';
+
+    // Apply theme to document
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    console.log(`✓ Theme initialized: ${savedTheme}`);
+}
+
+function toggleTheme() {
+    // Get current theme
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+    // Toggle to opposite theme
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    // Apply new theme
+    document.documentElement.setAttribute('data-theme', newTheme);
+
+    // Save to localStorage
+    localStorage.setItem(CONFIG.themeStorageKey, newTheme);
+
+    console.log(`✓ Theme changed to: ${newTheme}`);
 }
 
 // ===== Settings Functions =====
@@ -126,8 +174,10 @@ function handleRandom() {
 async function generateSentences(word) {
     // Check if API key is set
     if (!apiKey) {
-        showApiStatus('Please set your Gemini API key first', 'error');
-        toggleSettings(); // Open settings
+        showApiStatus('Please set your Groq API key in config.js or use the settings below', 'error');
+        if (!isApiKeyFromConfig) {
+            toggleSettings(); // Open settings if not using config file
+        }
         return;
     }
 

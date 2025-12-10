@@ -22,6 +22,24 @@
 
 ### Bước 2: Cấu hình ứng dụng
 
+**Có 2 cách để cấu hình API key:**
+
+#### Cách 1: Sử dụng file config.js (Khuyến nghị)
+
+1. Mở file `config.js`
+2. Thay đổi giá trị `GROQ_API_KEY`:
+   ```javascript
+   const APP_CONFIG = {
+       GROQ_API_KEY: 'your-api-key-here'
+   };
+   ```
+3. Lưu file và mở `index.html` trong trình duyệt
+4. UI nhập API key sẽ tự động ẩn đi
+
+**Lưu ý**: Đảm bảo file `config.js` không được commit lên Git (đã có trong `.gitignore`)
+
+#### Cách 2: Nhập trực tiếp trong giao diện
+
 1. Mở file `index.html` trong trình duyệt
 2. Click vào nút "⚙️ API Settings"
 3. Paste API key vào ô input
@@ -38,17 +56,22 @@
 
 ```
 .
-├── index.html      # File HTML chính
-├── style.css       # CSS với design system
-├── script.js       # JavaScript logic và Gemini API
-└── README.md       # Hướng dẫn sử dụng
+├── index.html          # File HTML chính
+├── style.css           # CSS với design system
+├── script.js           # JavaScript logic và Groq API
+├── config.js           # File cấu hình API key (không commit)
+├── config.example.js   # File mẫu cấu hình
+├── .gitignore          # Bảo vệ API key khỏi bị commit
+└── README.md           # Hướng dẫn sử dụng
 ```
 
 ## 🔒 Bảo mật
 
-- API key được lưu trong `localStorage` của trình duyệt
+- **Cách 1 (config.js)**: API key được lưu trong file `config.js` (đã được thêm vào `.gitignore`)
+- **Cách 2 (UI)**: API key được lưu trong `localStorage` của trình duyệt
 - Không gửi API key đến bất kỳ server nào khác ngoài Groq
 - Tất cả xử lý đều diễn ra trên client-side
+- **QUAN TRỌNG**: Không commit file `config.js` lên Git repository công khai
 
 ## 🛠️ Công nghệ sử dụng
 
