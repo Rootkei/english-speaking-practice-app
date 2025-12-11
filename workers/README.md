@@ -107,7 +107,7 @@ Cập nhật `config.js` trong frontend với URL mới:
 ```javascript
 const APP_CONFIG = {
     API_BASE_URL: window.location.hostname === 'localhost' 
-        ? 'http://localhost:5000'
+        ? 'https://english-practice-api.info-vinhky.workers.dev'
         : 'https://api.yourdomain.com'
 };
 ```

@@ -131,10 +131,10 @@ server/
 
 ```bash
 # Test health endpoint
-curl http://localhost:5000/api/health
+curl https://english-practice-api.info-vinhky.workers.dev/api/health
 
 # Test generate sentences
-curl -X POST http://localhost:5000/api/generate-sentences \
+curl -X POST https://english-practice-api.info-vinhky.workers.dev/api/generate-sentences \
   -H "Content-Type: application/json" \
   -d "{\"word\": \"adventure\", \"maxSentences\": 5}"
 ```
@@ -146,7 +146,7 @@ import requests
 
 # Test generate sentences
 response = requests.post(
-    'http://localhost:5000/api/generate-sentences',
+    'https://english-practice-api.info-vinhky.workers.dev/api/generate-sentences',
     json={'word': 'adventure', 'maxSentences': 5}
 )
 

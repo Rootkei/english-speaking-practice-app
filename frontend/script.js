@@ -4,7 +4,7 @@ const CONFIG = {
     // Backend API endpoint (configured in config.js)
     apiEndpoint: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.API_BASE_URL)
         ? APP_CONFIG.API_BASE_URL + '/api/generate-sentences'
-        : 'http://localhost:5000/api/generate-sentences',
+        : 'https://english-practice-api.info-vinhky.workers.dev/api/generate-sentences',
     themeStorageKey: 'theme_preference',
     historyStorageKey: 'vocabulary_history',
     bookmarksStorageKey: 'bookmarked_sentences',
