@@ -67,7 +67,7 @@ Edit `frontend/config.js`:
 ```javascript
 const APP_CONFIG = {
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'https://english-practice-api.info-vinhky.workers.dev'
+        ? 'https://english-speaking-practice-app.onrender.com'
         : 'https://english-practice-api.abc123.workers.dev'  // ← Your Workers URL
 };
 ```
@@ -156,7 +156,7 @@ wrangler deploy
 - [ ] Site accessible
 
 ### Testing
-- [ ] Backend health check: `https://english-practice-api.info-vinhky.workers.dev/api/health`
+- [ ] Backend health check: `https://english-speaking-practice-app.onrender.com/api/health`
 - [ ] Frontend loads: `https://username.github.io/repo-name/`
 - [ ] Generate sentences works
 - [ ] No CORS errors
@@ -181,7 +181,7 @@ wrangler tail
 
 **API errors:**
 - Verify GROQ_API_KEY is set correctly
-- Test endpoint: `curl https://english-practice-api.info-vinhky.workers.dev/api/health`
+- Test endpoint: `curl https://english-speaking-practice-app.onrender.com/api/health`
 
 ### Frontend Issues
 

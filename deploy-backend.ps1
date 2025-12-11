@@ -65,7 +65,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "3. Commit and push to deploy frontend" -ForegroundColor White
     Write-Host ""
     Write-Host "💡 Test your API:" -ForegroundColor Yellow
-    Write-Host "   curl https://english-practice-api.info-vinhky.workers.dev/api/health" -ForegroundColor White
+    Write-Host "   curl https://english-speaking-practice-app.onrender.com/api/health" -ForegroundColor White
 } else {
     Write-Host ""
     Write-Host "❌ Deployment failed!" -ForegroundColor Red

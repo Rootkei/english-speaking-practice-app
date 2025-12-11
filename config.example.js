@@ -1,9 +1,9 @@
 // Application Configuration
 const APP_CONFIG = {
     // Backend API Base URL
-    // For local development: https://english-practice-api.info-vinhky.workers.dev
-    // For production: https://english-practice-api.info-vinhky.workers.dev
+    // For local development: https://english-speaking-practice-app.onrender.com
+    // For production: https://english-speaking-practice-app.onrender.com
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'https://english-practice-api.info-vinhky.workers.dev'
-        : 'https://english-practice-api.info-vinhky.workers.dev'  // Replace with your Cloudflare Workers URL
+        ? 'https://english-speaking-practice-app.onrender.com'
+        : 'https://english-speaking-practice-app.onrender.com'  // Replace with your Cloudflare Workers URL
 };

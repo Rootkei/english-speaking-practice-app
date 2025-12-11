@@ -18,7 +18,7 @@ if (-not (Test-Path "frontend/config.js")) {
     Copy-Item "frontend/config.example.js" "frontend/config.js"
     Write-Host ""
     Write-Host "⚠️  IMPORTANT: Update frontend/config.js with your Workers URL!" -ForegroundColor Red
-    Write-Host "   Edit the file and replace 'https://english-practice-api.info-vinhky.workers.dev'" -ForegroundColor Yellow
+    Write-Host "   Edit the file and replace 'https://english-speaking-practice-app.onrender.com'" -ForegroundColor Yellow
     Write-Host ""
     $continue = Read-Host "Have you updated config.js? (y/n)"
     if ($continue -ne "y") {

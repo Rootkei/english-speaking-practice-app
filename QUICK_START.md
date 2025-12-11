@@ -52,7 +52,7 @@ Edit `frontend/config.js`:
 ```javascript
 const APP_CONFIG = {
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'https://english-practice-api.info-vinhky.workers.dev'
+        ? 'https://english-speaking-practice-app.onrender.com'
         : 'https://YOUR-WORKERS-URL'  // ← Paste your Workers URL
 };
 ```
@@ -83,7 +83,7 @@ Then enable GitHub Pages:
 
 Your app will be live at:
 - **Frontend**: `https://USERNAME.github.io/REPO/`
-- **Backend**: `https://english-practice-api.info-vinhky.workers.dev`
+- **Backend**: `https://english-speaking-practice-app.onrender.com`
 
 ---
 
