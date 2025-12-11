@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="Practice English speaking with AI-generated sentences and text-to-speech functionality">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="English Practice">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="icons/icon-512x512.png">
     <title>English Speaking Practice - Learn with Context</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +33,10 @@
                         English Speaking Practice
                     </h1>
                     <div class="header-actions">
+                        <button id="installBtn" class="icon-btn install-btn hidden" aria-label="Install app"
+                            title="Install App">
+                            <span>📥</span>
+                        </button>
                         <button id="historyBtn" class="icon-btn" aria-label="View history" title="History">
                             <span>📚</span>
                         </button>
@@ -107,6 +119,24 @@
             </div>
 
             <div class="input-section">
+                <!-- Topic Selector -->
+                <div class="topic-selector">
+                    <label for="topicSelect" class="topic-label">
+                        <span class="topic-icon">📚</span>
+                        <span>Select Topic:</span>
+                    </label>
+                    <select id="topicSelect" class="topic-select">
+                        <option value="all">🌍 All Topics</option>
+                        <option value="Travel ✈️">✈️ Travel</option>
+                        <option value="Business 💼">💼 Business</option>
+                        <option value="Technology 💻">💻 Technology</option>
+                        <option value="Food & Dining 🍽️">🍽️ Food & Dining</option>
+                        <option value="Lifestyle 🌿">🌿 Lifestyle</option>
+                        <option value="Education 🎓">🎓 Education</option>
+                        <option value="IELTS Vocabulary 📚">📚 IELTS Vocabulary</option>
+                    </select>
+                </div>
+
                 <div class="input-wrapper">
                     <input type="text" id="wordInput" class="word-input" placeholder="Enter a word to practice..."
                         autocomplete="off">
@@ -231,6 +261,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden"></div>
 
+    <script src="topics.js"></script>
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>

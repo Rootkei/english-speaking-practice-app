@@ -1,6 +1,7 @@
 // ===== Configuration =====
 const CONFIG = {
     maxSentences: 10,
+    selectedTopic: 'all',
     // Backend API endpoint (configured in config.js)
     apiEndpoint: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.API_BASE_URL)
         ? APP_CONFIG.API_BASE_URL + '/api/generate-sentences'
@@ -12,6 +13,7 @@ const CONFIG = {
     speechRateKey: 'speech_rate_preference',
     voicePreferenceKey: 'voice_preference',
     genderPreferenceKey: 'gender_preference',
+    topicPreferenceKey: 'topic_preference',
     randomWords: [
         'adventure', 'beautiful', 'challenge', 'discover', 'elegant',
         'freedom', 'grateful', 'harmony', 'inspire', 'journey',
@@ -27,6 +29,12 @@ const CONFIG = {
 const elements = {
     // Theme
     themeToggle: document.getElementById('themeToggle'),
+
+    // PWA
+    installBtn: document.getElementById('installBtn'),
+
+    // Topic Selector
+    topicSelect: document.getElementById('topicSelect'),
 
     // History & Bookmarks
     historyBtn: document.getElementById('historyBtn'),
@@ -72,14 +80,19 @@ const elements = {
 
 // ===== State Management =====
 let currentSpeech = null;
+let deferredPrompt = null;
 
 // ===== Initialize =====
 function init() {
     // Initialize theme
     initTheme();
 
+    // Initialize PWA
+    initPWA();
+
     // Initialize features
     initSentenceCount();
+    initTopicSelector();
     updateBookmarkCount();
     initVoiceSettings();
 
@@ -95,6 +108,16 @@ function init() {
             handleGenerate();
         }
     });
+
+    // Topic Selector
+    if (elements.topicSelect) {
+        elements.topicSelect.addEventListener('change', updateTopicPreference);
+    }
+
+    // PWA Install
+    if (elements.installBtn) {
+        elements.installBtn.addEventListener('click', handleInstallClick);
+    }
 
     // History & Bookmarks
     elements.historyBtn.addEventListener('click', () => {
@@ -135,6 +158,94 @@ function init() {
     });
 }
 
+// ===== PWA Functions =====
+function initPWA() {
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then((registration) => {
+                    console.log('✓ Service Worker registered:', registration.scope);
+                })
+                .catch((error) => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        });
+    }
+
+    // Handle install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+
+        // Store the event for later use
+        deferredPrompt = e;
+
+        // Show install button
+        if (elements.installBtn) {
+            elements.installBtn.classList.remove('hidden');
+        }
+
+        console.log('✓ Install prompt available');
+    });
+
+    // Handle successful installation
+    window.addEventListener('appinstalled', () => {
+        console.log('✓ PWA installed successfully');
+
+        // Hide install button
+        if (elements.installBtn) {
+            elements.installBtn.classList.add('hidden');
+        }
+
+        // Clear the deferred prompt
+        deferredPrompt = null;
+
+        // Show success message
+        showToast('🎉 App installed successfully!', 'success');
+    });
+
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('✓ Running as installed PWA');
+
+        // Hide install button if already installed
+        if (elements.installBtn) {
+            elements.installBtn.classList.add('hidden');
+        }
+    }
+}
+
+async function handleInstallClick() {
+    if (!deferredPrompt) {
+        console.log('Install prompt not available');
+        return;
+    }
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user's response
+    const { outcome } = await deferredPrompt.userChoice;
+
+    console.log(`User response to install prompt: ${outcome}`);
+
+    if (outcome === 'accepted') {
+        showToast('Installing app...', 'success');
+    } else {
+        showToast('Installation cancelled', 'info');
+    }
+
+    // Clear the deferred prompt
+    deferredPrompt = null;
+
+    // Hide install button
+    if (elements.installBtn) {
+        elements.installBtn.classList.add('hidden');
+    }
+}
+
+
 // ===== Theme Functions =====
 function initTheme() {
     // Get saved theme from localStorage or default to 'dark'
@@ -169,7 +280,43 @@ function toggleUserSettings() {
         isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
-// ===== Main Functions =====
+// ===== Topic Selector Functions =====
+function initTopicSelector() {
+    // Load saved topic preference
+    const savedTopic = localStorage.getItem(CONFIG.topicPreferenceKey) || 'all';
+    if (elements.topicSelect) {
+        elements.topicSelect.value = savedTopic;
+        CONFIG.selectedTopic = savedTopic;
+    }
+    console.log(`✓ Topic selector initialized: ${savedTopic}`);
+}
+
+function updateTopicPreference() {
+    const topic = elements.topicSelect.value;
+    CONFIG.selectedTopic = topic;
+    localStorage.setItem(CONFIG.topicPreferenceKey, topic);
+    console.log(`✓ Topic changed to: ${topic}`);
+    showToast(`Topic changed to: ${topic === 'all' ? 'All Topics' : topic}`, 'success');
+}
+
+function getWordsByTopic(topic) {
+    // If topics.js is not loaded or topic is 'all', return default random words
+    if (typeof TOPICS_DATA === 'undefined' || topic === 'all') {
+        // Collect all words from all topics
+        if (typeof TOPICS_DATA !== 'undefined') {
+            const allWords = [];
+            Object.values(TOPICS_DATA).forEach(words => {
+                allWords.push(...words);
+            });
+            return allWords.length > 0 ? allWords : CONFIG.randomWords;
+        }
+        return CONFIG.randomWords;
+    }
+
+    // Return words from selected topic
+    return TOPICS_DATA[topic] || CONFIG.randomWords;
+}
+
 function handleGenerate() {
     const word = elements.wordInput.value.trim();
 
@@ -181,7 +328,8 @@ function handleGenerate() {
 }
 
 function handleRandom() {
-    const randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+    const words = getWordsByTopic(CONFIG.selectedTopic);
+    const randomWord = words[Math.floor(Math.random() * words.length)];
     elements.wordInput.value = randomWord;
     generateSentences(randomWord);
 }
@@ -396,6 +544,7 @@ function saveToHistory(word, sentences) {
     const historyItem = {
         id: Date.now(),
         word: word,
+        topic: CONFIG.selectedTopic,
         sentences: sentences,
         createdAt: new Date().toISOString()
     };
@@ -408,7 +557,7 @@ function saveToHistory(word, sentences) {
     }
 
     localStorage.setItem(CONFIG.historyStorageKey, JSON.stringify(history));
-    console.log(`✓ Saved "${word}" to history`);
+    console.log(`✓ Saved "${word}" to history (Topic: ${CONFIG.selectedTopic})`);
 }
 
 function loadHistory() {
@@ -446,10 +595,18 @@ function displayHistory() {
         return;
     }
 
-    container.innerHTML = history.map(item => `
+    container.innerHTML = history.map(item => {
+        const topicBadge = item.topic && item.topic !== 'all'
+            ? `<span class="topic-badge">${item.topic}</span>`
+            : '';
+
+        return `
         <div class="history-item">
             <div class="item-header">
-                <span class="item-word">${item.word}</span>
+                <div class="item-header-left">
+                    <span class="item-word">${item.word}</span>
+                    ${topicBadge}
+                </div>
                 <span class="item-date">${formatDate(item.createdAt)}</span>
             </div>
             <div class="item-actions">
@@ -457,7 +614,8 @@ function displayHistory() {
                 <button class="item-btn delete" onclick="deleteHistoryItem(${item.id})">🗑️ Delete</button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function loadHistoryItem(id) {

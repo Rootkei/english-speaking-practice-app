@@ -39,7 +39,7 @@ Update `config.js` with your Cloudflare Workers URL:
 ```javascript
 const APP_CONFIG = {
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'https://english-speaking-practice-app.onrender.com'
+        ? 'http://127.0.0.1:5000'
         : 'https://english-speaking-practice-app.onrender.com'  // ← Your Workers URL
 };
 ```

@@ -64,23 +64,33 @@ def generate_sentences():
         
         # Create prompt for Groq AI
         prompt = f"""Generate exactly {max_sentences} example sentences using the word "{word}". 
-Each sentence should:
-1. Use the word "{word}" in a natural, contextual way
-2. Be in different contexts (e.g., business, education, personal development, travel, technology, etc.)
-3. Be clear and easy to understand for English learners
-4. Be between 10-20 words long
+
+IMPORTANT STRUCTURE: Each sentence MUST follow this exact pattern:
+"... because ..., so ..., but ..., and ..."
+
+Requirements for each sentence:
+1. Use the word "{word}" naturally within the sentence structure
+2. Follow the pattern: [statement] because [reason], so [consequence], but [contrast], and [addition]
+3. Be in different contexts (e.g., business, education, personal development, travel, technology, etc.)
+4. Be clear and easy to understand for English learners
+5. Make logical sense with smooth transitions between clauses
+
+Example structure:
+"I love learning English because it opens many opportunities, so I practice every day, but sometimes it's challenging, and I need to stay motivated."
 
 Format your response as a JSON array with this structure:
 [
   {{
-    "text": "The sentence using the word {word}",
+    "text": "The sentence using the word {word} following the 'because, so, but, and' pattern",
     "vietnamese": "Bản dịch tiếng Việt của câu trên",
     "context": "Brief context category (e.g., Business, Education, Travel)",
     "contextVietnamese": "Bản dịch tiếng Việt của context (ví dụ: Kinh doanh, Giáo dục, Du lịch)"
   }}
 ]
 
-IMPORTANT: You must provide accurate Vietnamese translations for both the sentence and the context category.
+IMPORTANT: 
+- Every sentence MUST contain "because", "so", "but", and "and" in that order
+- Provide accurate Vietnamese translations for both the sentence and the context category
 
 Return ONLY the JSON array, no additional text or explanation."""
         
