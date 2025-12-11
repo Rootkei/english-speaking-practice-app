@@ -12,6 +12,7 @@ const CONFIG = {
     speechRateKey: 'speech_rate_preference',
     voicePreferenceKey: 'voice_preference',
     genderPreferenceKey: 'gender_preference',
+    topicPreferenceKey: 'topic_preference',
     randomWords: [
         'adventure', 'beautiful', 'challenge', 'discover', 'elegant',
         'freedom', 'grateful', 'harmony', 'inspire', 'journey',
@@ -48,6 +49,9 @@ const elements = {
     // Sentence Count
     sentenceCount: document.getElementById('sentenceCount'),
 
+    // Topic Selector
+    topicSelect: document.getElementById('topicSelect'),
+
     // Pronunciation
     speechRate: document.getElementById('speechRate'),
     voiceSelect: document.getElementById('voiceSelect'),
@@ -80,6 +84,7 @@ function init() {
 
     // Initialize features
     initSentenceCount();
+    initTopicSelector();
     updateBookmarkCount();
     initVoiceSettings();
 
@@ -117,6 +122,9 @@ function init() {
 
     // Sentence Count
     elements.sentenceCount.addEventListener('change', updateSentenceCount);
+
+    // Topic Selector
+    elements.topicSelect.addEventListener('change', updateTopicPreference);
 
     // Pronunciation
     elements.speechRate.addEventListener('change', updateSpeechRate);
@@ -181,7 +189,23 @@ function handleGenerate() {
 }
 
 function handleRandom() {
-    const randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+    const selectedTopic = elements.topicSelect.value;
+    let randomWord;
+
+    if (selectedTopic === 'All Topics') {
+        // Random from all words
+        randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+    } else {
+        // Random from selected topic
+        const topicWords = TOPICS_DATA[selectedTopic];
+        if (topicWords && topicWords.length > 0) {
+            randomWord = topicWords[Math.floor(Math.random() * topicWords.length)];
+        } else {
+            // Fallback to all words if topic not found
+            randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+        }
+    }
+
     elements.wordInput.value = randomWord;
     generateSentences(randomWord);
 }
@@ -209,9 +233,12 @@ async function generateSentences(word) {
 }
 
 async function fetchSentencesFromBackend(word) {
+    const selectedTopic = elements.topicSelect.value;
+
     const requestBody = {
         word: word,
-        maxSentences: CONFIG.maxSentences
+        maxSentences: CONFIG.maxSentences,
+        topic: selectedTopic
     };
 
     const response = await fetch(CONFIG.apiEndpoint, {
@@ -561,6 +588,33 @@ function updateSentenceCount() {
     CONFIG.maxSentences = parseInt(count);
     localStorage.setItem(CONFIG.sentenceCountKey, count);
     console.log(`✓ Sentence count updated to ${count}`);
+}
+
+// ===== Topic Selector Functions =====
+function initTopicSelector() {
+    const savedTopic = localStorage.getItem(CONFIG.topicPreferenceKey) || 'All Topics';
+
+    // Populate topic options from TOPICS_DATA
+    const topicSelect = elements.topicSelect;
+
+    // Add all topics from TOPICS_DATA
+    Object.keys(TOPICS_DATA).forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        topicSelect.appendChild(option);
+    });
+
+    // Set saved topic
+    topicSelect.value = savedTopic;
+
+    console.log(`✓ Topic selector initialized: ${savedTopic}`);
+}
+
+function updateTopicPreference() {
+    const topic = elements.topicSelect.value;
+    localStorage.setItem(CONFIG.topicPreferenceKey, topic);
+    console.log(`✓ Topic preference updated to: ${topic}`);
 }
 
 // ===== Copy to Clipboard =====
