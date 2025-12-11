@@ -1,102 +1,105 @@
 # 🎯 English Speaking Practice App
 
-Ứng dụng luyện nói tiếng Anh sử dụng Groq AI để tạo câu văn ngữ cảnh và phát âm tự động.
+Full-stack application for English speaking practice using AI-generated sentences.
 
-## ✨ Tính năng
-
-- 🤖 **Tạo câu tự động bằng AI**: Sử dụng Groq AI để tạo 10 câu với ngữ cảnh khác nhau
-- 🇻🇳 **Phụ đề tiếng Việt**: Hiển thị bản dịch tiếng Việt bên dưới mỗi câu tiếng Anh
-- 🔊 **Phát âm tự động**: Text-to-speech để nghe phát âm chuẩn
-- 🎲 **Từ ngẫu nhiên**: Tự động chọn từ ngẫu nhiên nếu không nhập gì
-- 💾 **Lưu API key**: API key được lưu an toàn trong trình duyệt
-- 🎨 **Giao diện đẹp mắt**: Thiết kế hiện đại với hiệu ứng glassmorphism và gradient
-
-## 🚀 Cách sử dụng
-
-### Bước 1: Lấy API Key từ Groq
-
-1. Truy cập [Groq Console](https://console.groq.com/keys)
-2. Đăng nhập bằng tài khoản Google hoặc GitHub
-3. Click "Create API Key" và đặt tên cho key
-4. Copy API key
-
-### Bước 2: Cấu hình ứng dụng
-
-**Có 2 cách để cấu hình API key:**
-
-#### Cách 1: Sử dụng file config.js (Khuyến nghị)
-
-1. Mở file `config.js`
-2. Thay đổi giá trị `GROQ_API_KEY`:
-   ```javascript
-   const APP_CONFIG = {
-       GROQ_API_KEY: 'your-api-key-here'
-   };
-   ```
-3. Lưu file và mở `index.html` trong trình duyệt
-4. UI nhập API key sẽ tự động ẩn đi
-
-**Lưu ý**: Đảm bảo file `config.js` không được commit lên Git (đã có trong `.gitignore`)
-
-#### Cách 2: Nhập trực tiếp trong giao diện
-
-1. Mở file `index.html` trong trình duyệt
-2. Click vào nút "⚙️ API Settings"
-3. Paste API key vào ô input
-4. Click "💾 Save API Key"
-
-### Bước 3: Bắt đầu luyện tập
-
-1. **Nhập từ**: Gõ một từ tiếng Anh vào ô input
-2. **Hoặc random**: Click "🎲 Random Word" để chọn từ ngẫu nhiên
-3. **Tạo câu**: Click "✨ Generate Sentences"
-4. **Nghe phát âm**: Click icon 🔊 để nghe từng câu
-
-## 📁 Cấu trúc file
+## 📁 Project Structure
 
 ```
-.
-├── index.html          # File HTML chính
-├── style.css           # CSS với design system
-├── script.js           # JavaScript logic và Groq API
-├── config.js           # File cấu hình API key (không commit)
-├── config.example.js   # File mẫu cấu hình
-├── .gitignore          # Bảo vệ API key khỏi bị commit
-└── README.md           # Hướng dẫn sử dụng
+test/
+├── frontend/              # Frontend (GitHub Pages)
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   ├── config.js         # Create from config.example.js
+│   └── README.md
+│
+├── backend/               # Backend (Cloudflare Workers)
+│   ├── index.js
+│   ├── wrangler.toml
+│   └── README.md
+│
+├── server/                # Local development server (Flask)
+│   ├── app.py
+│   ├── routes/
+│   └── README.md
+│
+└── docs/                  # Documentation
+    └── DEPLOYMENT.md
 ```
 
-## 🔒 Bảo mật
+## 🚀 Quick Start
 
-- **Cách 1 (config.js)**: API key được lưu trong file `config.js` (đã được thêm vào `.gitignore`)
-- **Cách 2 (UI)**: API key được lưu trong `localStorage` của trình duyệt
-- Không gửi API key đến bất kỳ server nào khác ngoài Groq
-- Tất cả xử lý đều diễn ra trên client-side
-- **QUAN TRỌNG**: Không commit file `config.js` lên Git repository công khai
+### Local Development
 
-## 🛠️ Công nghệ sử dụng
-
-- **HTML5**: Cấu trúc semantic
-- **CSS3**: Design system với CSS variables, glassmorphism, animations
-- **JavaScript (ES6+)**: Async/await, Fetch API, Web Speech API
-- **Groq API**: Tạo câu văn tự động với LLaMA 3.3 70B
-- **Web Speech API**: Text-to-speech
-
-## 💡 Lưu ý
-
-- Cần kết nối internet để sử dụng Groq API
-- Trình duyệt cần hỗ trợ Web Speech API (Chrome, Edge, Safari)
-- API key miễn phí có giới hạn số lượng request
-
-## 🎨 Tùy chỉnh
-
-Bạn có thể tùy chỉnh trong file `script.js`:
-
-```javascript
-const CONFIG = {
-    maxSentences: 10,  // Số câu tạo ra (mặc định: 10)
-    randomWords: [...] // Danh sách từ random
-};
+**1. Start Backend (Flask)**
+```bash
+cd server
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
 ```
+
+**2. Start Frontend**
+```bash
+cd frontend
+# Create config.js
+copy config.example.js config.js
+# Open index.html with Live Server
+```
+
+### Production Deployment
+
+**1. Deploy Backend to Cloudflare Workers**
+```bash
+cd backend
+wrangler login
+wrangler secret put GROQ_API_KEY
+wrangler deploy
+```
+
+**2. Deploy Frontend to GitHub Pages**
+- Push code to GitHub
+- Settings → Pages → Source: `main` branch, `/frontend` folder
+- Update `frontend/config.js` with Workers URL
+
+See detailed guides in each directory's README.
+
+## 🔗 Live URLs
+
+- **Frontend**: `https://yourusername.github.io/repo-name/`
+- **Backend**: `https://your-worker.workers.dev`
+
+## 📚 Documentation
+
+- [Frontend README](frontend/README.md)
+- [Backend README](backend/README.md)
+- [Server README](server/README.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+
+## ✨ Features
+
+- 🤖 AI-generated sentences using Groq AI
+- 🇻🇳 Vietnamese translations
+- 🔊 Text-to-speech pronunciation
+- 📚 History and bookmarks
+- 🎨 Beautiful glassmorphism UI
+- 🌓 Dark/Light theme
+- ☕ Buy me coffee support
+
+## 🛠️ Tech Stack
+
+### Frontend
+- HTML5, CSS3, JavaScript (ES6+)
+- Web Speech API
+- Deployed on GitHub Pages
+
+### Backend
+- Cloudflare Workers (JavaScript)
+- Groq AI API (LLaMA 3.3 70B)
+
+### Local Development
+- Python/Flask server
 
 ## 📝 License
 
@@ -104,4 +107,4 @@ Free to use for personal and educational purposes.
 
 ---
 
-**Powered by Groq AI** ⚡
+**Powered by Groq AI** ⚡ | **Deployed on Cloudflare & GitHub** 🚀

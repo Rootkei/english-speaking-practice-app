@@ -5,6 +5,17 @@ config.js
 .env
 .env.local
 
+# Server environment
+server/.env
+server/__pycache__/
+server/*.pyc
+server/venv/
+server/.venv/
+
+# Workers
+workers/.dev.vars
+.wrangler/
+
 # Node modules (if using build tools)
 node_modules/
 
@@ -15,3 +26,7 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

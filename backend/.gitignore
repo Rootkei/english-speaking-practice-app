@@ -1,0 +1,7 @@
+# Wrangler
+.dev.vars
+.wrangler/
+
+# OS
+.DS_Store
+Thumbs.db

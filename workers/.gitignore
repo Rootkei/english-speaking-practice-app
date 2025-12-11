@@ -1,0 +1,11 @@
+# Wrangler
+.dev.vars
+.wrangler/
+wrangler.toml.backup
+
+# Node modules
+node_modules/
+
+# Environment
+.env
+.env.local
