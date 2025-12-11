@@ -83,7 +83,7 @@ Then enable GitHub Pages:
 
 Your app will be live at:
 - **Frontend**: `https://USERNAME.github.io/REPO/`
-- **Backend**: `https://your-worker.workers.dev`
+- **Backend**: `https://english-practice-api.info-vinhky.workers.dev`
 
 ---
 

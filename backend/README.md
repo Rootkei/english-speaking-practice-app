@@ -62,13 +62,13 @@ wrangler deploy
 ### Health Check
 
 ```bash
-curl https://your-worker.workers.dev/api/health
+curl https://english-practice-api.info-vinhky.workers.dev/api/health
 ```
 
 ### Generate Sentences
 
 ```bash
-curl -X POST https://your-worker.workers.dev/api/generate-sentences \
+curl -X POST https://english-practice-api.info-vinhky.workers.dev/api/generate-sentences \
   -H "Content-Type: application/json" \
   -d "{\"word\": \"adventure\", \"maxSentences\": 5}"
 ```

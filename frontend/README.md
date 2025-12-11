@@ -40,7 +40,7 @@ Update `config.js` with your Cloudflare Workers URL:
 const APP_CONFIG = {
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000'
-        : 'https://your-worker.workers.dev'  // ← Your Workers URL
+        : 'https://english-practice-api.info-vinhky.workers.dev'  // ← Your Workers URL
 };
 ```
 

@@ -5,7 +5,7 @@ compatibility_date = "2024-01-01"
 # Environment variables (non-sensitive)
 [vars]
 # Add your production frontend URL here after deploying to GitHub Pages
-# ALLOWED_ORIGINS = "https://yourusername.github.io"
+# ALLOWED_ORIGINS = "https://rootkei.github.io"
 
 # Secrets (set via: wrangler secret put GROQ_API_KEY)
 # GROQ_API_KEY = "set-via-wrangler-cli"
