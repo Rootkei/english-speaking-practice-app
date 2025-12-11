@@ -51,6 +51,11 @@ def create_app(config_name='default'):
     return app
 
 
+# Create app instance for Gunicorn
+# This allows Gunicorn to import with: gunicorn app:app
+app = create_app(os.environ.get('FLASK_ENV', 'production'))
+
+
 if __name__ == '__main__':
     # Get environment
     env = os.environ.get('FLASK_ENV', 'development')
