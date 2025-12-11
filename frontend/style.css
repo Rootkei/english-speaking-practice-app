@@ -333,34 +333,6 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* ===== Install Button (PWA) ===== */
-.install-btn {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-color: transparent;
-    color: white;
-    animation: installPulse 2s ease-in-out infinite;
-}
-
-.install-btn:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
-    border-color: transparent;
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md), var(--shadow-glow-primary);
-}
-
-@keyframes installPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-    }
-
-    50% {
-        box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
-    }
-}
-
-
 /* ===== Modals ===== */
 .modal {
     position: fixed;
@@ -1027,12 +999,11 @@ body {
 .input-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(10px);
     box-shadow: var(--shadow-md);
-    animation: fadeInUp 0.6s ease 0.4s backwards;
     transition: all var(--transition-base);
 }
 
@@ -1040,70 +1011,6 @@ body {
     border-color: var(--border-hover);
     box-shadow: var(--shadow-lg);
 }
-
-/* ===== Topic Selector ===== */
-.topic-selector {
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.topic-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.topic-icon {
-    font-size: 1.25rem;
-}
-
-.topic-select {
-    width: 100%;
-    padding: 0.875rem 1.25rem;
-    font-size: 1rem;
-    font-family: inherit;
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    outline: none;
-}
-
-.topic-select:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-tertiary);
-}
-
-.topic-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px var(--border-focus);
-}
-
-/* Topic Badge for History Items */
-.topic-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: var(--radius-full);
-    margin-left: var(--spacing-sm);
-}
-
-.item-header-left {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
 
 .input-wrapper {
     display: flex;

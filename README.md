@@ -1,116 +1,115 @@
-# 🎯 English Speaking Practice App
-
-Full-stack application for English speaking practice using AI-generated sentences.
+# English Speaking Practice App
 
 ## 📁 Project Structure
 
 ```
 test/
-├── frontend/              # Frontend (GitHub Pages)
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   ├── config.js         # Create from config.example.js
-│   └── README.md
+├── frontend/              # 🌐 Frontend files (deployed to GitHub Pages)
+│   ├── index.html        # Main HTML file
+│   ├── script.js         # JavaScript logic (with topic selector)
+│   ├── style.css         # Styles
+│   ├── topics.js         # Topic data
+│   ├── config.js         # API configuration
+│   ├── manifest.json     # PWA manifest
+│   ├── service-worker.js # Service worker
+│   ├── offline.html      # Offline page
+│   ├── icons/            # App icons
+│   └── buy-me-coffee.jpg # QR code image
 │
-├── backend/               # Backend (Cloudflare Workers)
-│   ├── index.js
-│   ├── wrangler.toml
-│   └── README.md
+├── server/               # 🐍 Backend API (Python Flask)
+│   ├── app.py           # Main Flask app
+│   ├── routes/          # API routes
+│   ├── config.py        # Server configuration
+│   └── requirements.txt # Python dependencies
 │
-├── server/                # Local development server (Flask)
-│   ├── app.py
-│   ├── routes/
-│   └── README.md
+├── .github/
+│   └── workflows/
+│       └── deploy.yml   # GitHub Actions (deploys from /frontend)
 │
-└── docs/                  # Documentation
-    └── DEPLOYMENT.md
+└── README.md            # This file
 ```
 
 ## 🚀 Quick Start
 
-### Local Development
+### Frontend (Local Development)
 
-**1. Start Backend (Flask)**
+```bash
+# Open in browser
+file:///c:/Mine/test/frontend/index.html
+
+# Or use Live Server
+cd frontend
+# Start your preferred local server
+```
+
+### Backend (Local Development)
+
 ```bash
 cd server
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+.\venv\Scripts\Activate.ps1  # Windows
 python app.py
+# Server runs at http://127.0.0.1:5000
 ```
 
-**2. Start Frontend**
-```bash
-cd frontend
-# Create config.js
-copy config.example.js config.js
-# Open index.html with Live Server
-```
+## 🌐 Deployment
 
-### Production Deployment
+### Frontend → GitHub Pages
+- **Automatic**: Push to `main` branch
+- **GitHub Actions** deploys from `/frontend` directory
+- **URL**: Your GitHub Pages URL
 
-**1. Deploy Backend to Cloudflare Workers**
-```bash
-cd backend
-wrangler login
-wrangler secret put GROQ_API_KEY
-wrangler deploy
-```
-
-**2. Deploy Frontend to GitHub Pages**
-- Push code to GitHub
-- Settings → Pages → Source: `main` branch, `/frontend` folder
-- Update `frontend/config.js` with Workers URL
-
-See detailed guides in each directory's README.
-
-## 🔗 Live URLs
-
-- **Frontend**: `https://yourusername.github.io/repo-name/`
-- **Backend**: `https://english-practice-api.info-vinhky.workers.dev`
-
-## 📚 Documentation
-
-- [Frontend README](frontend/README.md)
-- [Backend README](backend/README.md)
-- [Server README](server/README.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
+### Backend → Render
+- Use `/server` directory
+- See `server/README.md` for deployment instructions
 
 ## ✨ Features
 
-- 🤖 AI-generated sentences using Groq AI
-- 🇻🇳 Vietnamese translations
-- 🔊 Text-to-speech pronunciation
-- 📚 History and bookmarks
-- 🎨 Beautiful glassmorphism UI
-- 🌓 Dark/Light theme
-- ☕ Buy me coffee support
+- 🎯 **Topic Selector**: Choose specific topics or random
+- 🔊 **Text-to-Speech**: Pronunciation support
+- 📚 **History & Bookmarks**: Save your progress
+- 🌙 **Dark/Light Theme**: Toggle themes
+- 📱 **PWA Support**: Install as app
+- 🌐 **Offline Support**: Works without internet
 
-## 🛠️ Tech Stack
+## 🛠️ Configuration
 
-### Frontend
-- HTML5, CSS3, JavaScript (ES6+)
-- Web Speech API
-- Deployed on GitHub Pages
+### Frontend API Endpoint
 
-### Backend
-- Cloudflare Workers (JavaScript)
-- Groq AI API (LLaMA 3.3 70B)
+Edit `frontend/config.js`:
 
-### Local Development
-- Python/Flask server
+```javascript
+const APP_CONFIG = {
+    API_BASE_URL: 'https://your-backend-url.com'
+};
+```
 
-## 📝 License
+### Backend Environment
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Edit `server/.env`:
+
+```
+GROQ_API_KEY=your_groq_api_key
+FLASK_ENV=production
+```
+
+## 📝 Development Notes
+
+- **Frontend files** are in `/frontend` directory
+- **No duplicate files** in root (cleaned up)
+- **GitHub Actions** automatically deploys frontend
+- **Topic selector** feature fully integrated
+- **Strong AI prompts** ensure topic-specific contexts
+
+## 🔗 Links
+
+- **Frontend Repo**: [GitHub](https://github.com/yourusername/yourrepo)
+- **Live Demo**: [GitHub Pages URL]
+- **API Docs**: See `server/README.md`
+
+## 📄 License
+
+See [LICENSE](LICENSE) file.
 
 ---
 
-**Powered by Groq AI** ⚡ | **Deployed on Cloudflare & GitHub** 🚀
-
----
-
-© 2025 English Speaking Practice App. All rights reserved.
-
-Made with ❤️ by **Nguyen Vinh Ky (Rootkei)**
+Made with ❤️ by Nguyen Vinh Ky (Rootkei)

@@ -1,7 +1,6 @@
 // ===== Configuration =====
 const CONFIG = {
     maxSentences: 10,
-    selectedTopic: 'all',
     // Backend API endpoint (configured in config.js)
     apiEndpoint: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.API_BASE_URL)
         ? APP_CONFIG.API_BASE_URL + '/api/generate-sentences'
@@ -30,12 +29,6 @@ const elements = {
     // Theme
     themeToggle: document.getElementById('themeToggle'),
 
-    // PWA
-    installBtn: document.getElementById('installBtn'),
-
-    // Topic Selector
-    topicSelect: document.getElementById('topicSelect'),
-
     // History & Bookmarks
     historyBtn: document.getElementById('historyBtn'),
     bookmarksBtn: document.getElementById('bookmarksBtn'),
@@ -55,6 +48,9 @@ const elements = {
 
     // Sentence Count
     sentenceCount: document.getElementById('sentenceCount'),
+
+    // Topic Selector
+    topicSelect: document.getElementById('topicSelect'),
 
     // Pronunciation
     speechRate: document.getElementById('speechRate'),
@@ -80,15 +76,11 @@ const elements = {
 
 // ===== State Management =====
 let currentSpeech = null;
-let deferredPrompt = null;
 
 // ===== Initialize =====
 function init() {
     // Initialize theme
     initTheme();
-
-    // Initialize PWA
-    initPWA();
 
     // Initialize features
     initSentenceCount();
@@ -108,16 +100,6 @@ function init() {
             handleGenerate();
         }
     });
-
-    // Topic Selector
-    if (elements.topicSelect) {
-        elements.topicSelect.addEventListener('change', updateTopicPreference);
-    }
-
-    // PWA Install
-    if (elements.installBtn) {
-        elements.installBtn.addEventListener('click', handleInstallClick);
-    }
 
     // History & Bookmarks
     elements.historyBtn.addEventListener('click', () => {
@@ -141,6 +123,9 @@ function init() {
     // Sentence Count
     elements.sentenceCount.addEventListener('change', updateSentenceCount);
 
+    // Topic Selector
+    elements.topicSelect.addEventListener('change', updateTopicPreference);
+
     // Pronunciation
     elements.speechRate.addEventListener('change', updateSpeechRate);
     elements.voiceSelect.addEventListener('change', updateVoicePreference);
@@ -157,94 +142,6 @@ function init() {
         if (e.target === elements.coffeeModal) closeModal(elements.coffeeModal);
     });
 }
-
-// ===== PWA Functions =====
-function initPWA() {
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then((registration) => {
-                    console.log('✓ Service Worker registered:', registration.scope);
-                })
-                .catch((error) => {
-                    console.error('Service Worker registration failed:', error);
-                });
-        });
-    }
-
-    // Handle install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-
-        // Store the event for later use
-        deferredPrompt = e;
-
-        // Show install button
-        if (elements.installBtn) {
-            elements.installBtn.classList.remove('hidden');
-        }
-
-        console.log('✓ Install prompt available');
-    });
-
-    // Handle successful installation
-    window.addEventListener('appinstalled', () => {
-        console.log('✓ PWA installed successfully');
-
-        // Hide install button
-        if (elements.installBtn) {
-            elements.installBtn.classList.add('hidden');
-        }
-
-        // Clear the deferred prompt
-        deferredPrompt = null;
-
-        // Show success message
-        showToast('🎉 App installed successfully!', 'success');
-    });
-
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('✓ Running as installed PWA');
-
-        // Hide install button if already installed
-        if (elements.installBtn) {
-            elements.installBtn.classList.add('hidden');
-        }
-    }
-}
-
-async function handleInstallClick() {
-    if (!deferredPrompt) {
-        console.log('Install prompt not available');
-        return;
-    }
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice;
-
-    console.log(`User response to install prompt: ${outcome}`);
-
-    if (outcome === 'accepted') {
-        showToast('Installing app...', 'success');
-    } else {
-        showToast('Installation cancelled', 'info');
-    }
-
-    // Clear the deferred prompt
-    deferredPrompt = null;
-
-    // Hide install button
-    if (elements.installBtn) {
-        elements.installBtn.classList.add('hidden');
-    }
-}
-
 
 // ===== Theme Functions =====
 function initTheme() {
@@ -280,43 +177,7 @@ function toggleUserSettings() {
         isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
-// ===== Topic Selector Functions =====
-function initTopicSelector() {
-    // Load saved topic preference
-    const savedTopic = localStorage.getItem(CONFIG.topicPreferenceKey) || 'all';
-    if (elements.topicSelect) {
-        elements.topicSelect.value = savedTopic;
-        CONFIG.selectedTopic = savedTopic;
-    }
-    console.log(`✓ Topic selector initialized: ${savedTopic}`);
-}
-
-function updateTopicPreference() {
-    const topic = elements.topicSelect.value;
-    CONFIG.selectedTopic = topic;
-    localStorage.setItem(CONFIG.topicPreferenceKey, topic);
-    console.log(`✓ Topic changed to: ${topic}`);
-    showToast(`Topic changed to: ${topic === 'all' ? 'All Topics' : topic}`, 'success');
-}
-
-function getWordsByTopic(topic) {
-    // If topics.js is not loaded or topic is 'all', return default random words
-    if (typeof TOPICS_DATA === 'undefined' || topic === 'all') {
-        // Collect all words from all topics
-        if (typeof TOPICS_DATA !== 'undefined') {
-            const allWords = [];
-            Object.values(TOPICS_DATA).forEach(words => {
-                allWords.push(...words);
-            });
-            return allWords.length > 0 ? allWords : CONFIG.randomWords;
-        }
-        return CONFIG.randomWords;
-    }
-
-    // Return words from selected topic
-    return TOPICS_DATA[topic] || CONFIG.randomWords;
-}
-
+// ===== Main Functions =====
 function handleGenerate() {
     const word = elements.wordInput.value.trim();
 
@@ -328,8 +189,23 @@ function handleGenerate() {
 }
 
 function handleRandom() {
-    const words = getWordsByTopic(CONFIG.selectedTopic);
-    const randomWord = words[Math.floor(Math.random() * words.length)];
+    const selectedTopic = elements.topicSelect.value;
+    let randomWord;
+
+    if (selectedTopic === 'All Topics') {
+        // Random from all words
+        randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+    } else {
+        // Random from selected topic
+        const topicWords = TOPICS_DATA[selectedTopic];
+        if (topicWords && topicWords.length > 0) {
+            randomWord = topicWords[Math.floor(Math.random() * topicWords.length)];
+        } else {
+            // Fallback to all words if topic not found
+            randomWord = CONFIG.randomWords[Math.floor(Math.random() * CONFIG.randomWords.length)];
+        }
+    }
+
     elements.wordInput.value = randomWord;
     generateSentences(randomWord);
 }
@@ -357,9 +233,12 @@ async function generateSentences(word) {
 }
 
 async function fetchSentencesFromBackend(word) {
+    const selectedTopic = elements.topicSelect.value;
+
     const requestBody = {
         word: word,
-        maxSentences: CONFIG.maxSentences
+        maxSentences: CONFIG.maxSentences,
+        topic: selectedTopic
     };
 
     const response = await fetch(CONFIG.apiEndpoint, {
@@ -544,7 +423,6 @@ function saveToHistory(word, sentences) {
     const historyItem = {
         id: Date.now(),
         word: word,
-        topic: CONFIG.selectedTopic,
         sentences: sentences,
         createdAt: new Date().toISOString()
     };
@@ -557,7 +435,7 @@ function saveToHistory(word, sentences) {
     }
 
     localStorage.setItem(CONFIG.historyStorageKey, JSON.stringify(history));
-    console.log(`✓ Saved "${word}" to history (Topic: ${CONFIG.selectedTopic})`);
+    console.log(`✓ Saved "${word}" to history`);
 }
 
 function loadHistory() {
@@ -595,18 +473,10 @@ function displayHistory() {
         return;
     }
 
-    container.innerHTML = history.map(item => {
-        const topicBadge = item.topic && item.topic !== 'all'
-            ? `<span class="topic-badge">${item.topic}</span>`
-            : '';
-
-        return `
+    container.innerHTML = history.map(item => `
         <div class="history-item">
             <div class="item-header">
-                <div class="item-header-left">
-                    <span class="item-word">${item.word}</span>
-                    ${topicBadge}
-                </div>
+                <span class="item-word">${item.word}</span>
                 <span class="item-date">${formatDate(item.createdAt)}</span>
             </div>
             <div class="item-actions">
@@ -614,8 +484,7 @@ function displayHistory() {
                 <button class="item-btn delete" onclick="deleteHistoryItem(${item.id})">🗑️ Delete</button>
             </div>
         </div>
-    `;
-    }).join('');
+    `).join('');
 }
 
 function loadHistoryItem(id) {
@@ -719,6 +588,33 @@ function updateSentenceCount() {
     CONFIG.maxSentences = parseInt(count);
     localStorage.setItem(CONFIG.sentenceCountKey, count);
     console.log(`✓ Sentence count updated to ${count}`);
+}
+
+// ===== Topic Selector Functions =====
+function initTopicSelector() {
+    const savedTopic = localStorage.getItem(CONFIG.topicPreferenceKey) || 'All Topics';
+
+    // Populate topic options from TOPICS_DATA
+    const topicSelect = elements.topicSelect;
+
+    // Add all topics from TOPICS_DATA
+    Object.keys(TOPICS_DATA).forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        topicSelect.appendChild(option);
+    });
+
+    // Set saved topic
+    topicSelect.value = savedTopic;
+
+    console.log(`✓ Topic selector initialized: ${savedTopic}`);
+}
+
+function updateTopicPreference() {
+    const topic = elements.topicSelect.value;
+    localStorage.setItem(CONFIG.topicPreferenceKey, topic);
+    console.log(`✓ Topic preference updated to: ${topic}`);
 }
 
 // ===== Copy to Clipboard =====
