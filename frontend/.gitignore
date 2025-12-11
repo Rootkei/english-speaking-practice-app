@@ -1,5 +1,5 @@
-# Configuration
-config.js
+# Configuration (uncomment for local development only)
+# config.js
 
 # OS
 .DS_Store
