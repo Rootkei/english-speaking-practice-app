@@ -1870,3 +1870,30 @@ body {
         transform: scale(0.9);
     }
 }
+
+/* ===== Footer Copyright ===== */
+.footer-copyright {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.footer-copyright p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0.25rem 0;
+}
+
+.footer-author {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.footer-author strong {
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+}
